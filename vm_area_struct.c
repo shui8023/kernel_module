@@ -22,16 +22,22 @@
 #include <linux/slab.h>
 #include <linux/mm.h>
 #include <linux/sched.h>
+#include <linux/interrupt.h>
 MODULE_LICENSE("GPL");
 
 
 static int __init module(void)
 {
-    struct mm_struct  *mymm = (&init_task)->mm ;
+    struct pid *current_pid;
+    struct task_struct *current_task;
+    struct mm_struct  *mymm;
     struct vm_area_struct *pos = NULL;
-    printk("current process:%s %d\n", current->comm, current->pid);
+
+    current_pid = find_vpid(7887);
+    current_task = pid_task(current_pid, PIDTYPE_PID);
+    mymm = current_task->mm;
     for(pos = mymm->mmap; pos; pos = pos->vm_next) {
-            printk("0x%lx-0x%lx\t", pos->vm_start, pos->vm_end);
+            printk("0x%hx-0x%hx\t%ld\t", pos->vm_start, pos->vm_end,pos->rb_subtree_gap);
             if(pos->vm_flags & VM_READ) {
 	                printk("r");
 	            } else {
